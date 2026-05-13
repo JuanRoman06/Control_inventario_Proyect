@@ -1,0 +1,36 @@
+# Entorno virtual
+venv/
+.venv/
+
+# Cache y compilados de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Archivos de configuración/locales
+.env
+.flaskenv
+
+# Carpeta de instancia de Flask
+instance/
+
+# Testing y cobertura
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Empaquetado / build
+dist/
+build/
+*.egg-info/
+
+# Base de datos local SQLite
+*.db
+*.sqlite3
+
+# Archivos del sistema/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

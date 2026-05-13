@@ -7,3 +7,5 @@ class Producto(db.Model):
     nombre = db.Column(db.String(100), nullable=False)
     precio = db.Column(db.Integer, nullable=False)
     stock = db.Column(db.Integer, default=0)
+
+    ventas = db.relationship('Venta', back_populates='producto', lazy=True)

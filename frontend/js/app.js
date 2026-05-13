@@ -88,6 +88,7 @@ function venderProducto(id, cantidad) {
         headers: {
             "Content-Type": "application/json"
         },
+
         body: JSON.stringify({
             cantidad: parseInt(cantidad)
         })

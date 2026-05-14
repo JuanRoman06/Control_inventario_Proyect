@@ -1,5 +1,6 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from models.venta import Venta
+
 
 ventas_bp = Blueprint('ventas', __name__)
 

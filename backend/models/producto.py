@@ -9,3 +9,4 @@ class Producto(db.Model):
     stock = db.Column(db.Integer, default=0)
 
     ventas = db.relationship('Venta', back_populates='producto', lazy=True)
+    movimientos = db.relationship('Movimiento', backref='producto_rel', lazy=True)

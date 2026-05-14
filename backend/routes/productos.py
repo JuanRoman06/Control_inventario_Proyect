@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 from models.producto import Producto
 from database.db import db
 from models.venta import Venta
+from models.movimiento import Movimiento
 
 productos_bp = Blueprint('productos', __name__)
 
@@ -34,6 +35,16 @@ def crear_producto():
 
     db.session.add(nuevo_producto)
     db.session.commit()
+
+    if stock > 0:
+        movimiento_inicial = Movimiento(
+            producto_id=nuevo_producto.id,
+            tipo="entrada",
+            cantidad=stock,
+            motivo="Stock inicial"
+        )
+        db.session.add(movimiento_inicial)
+        db.session.commit()
 
     return jsonify({
         "mensaje": "Producto creado",
@@ -105,11 +116,25 @@ def manejar_producto(id):
         if not isinstance(stock, int) or stock < 0:
             return jsonify({"mensaje": "El stock debe ser un número entero mayor o igual a 0"}), 400
 
+        stock_anterior = producto.stock
+        diferencia = stock - stock_anterior
+
         producto.nombre = nombre.strip()
         producto.precio = precio
         producto.stock = stock
 
         db.session.commit()
+
+        if diferencia != 0:
+            tipo = "entrada" if diferencia > 0 else "salida"
+            movimiento = Movimiento(
+                producto_id=producto.id,
+                tipo=tipo,
+                cantidad=abs(diferencia),
+                motivo="Edición manual de producto"
+            )
+            db.session.add(movimiento)
+            db.session.commit()
 
         return jsonify({
             "mensaje": "Producto actualizado",
@@ -148,7 +173,15 @@ def vender_producto(id):
             cantidad=cantidad
         )
 
+        nuevo_movimiento = Movimiento(
+            producto_id=producto.id,
+            tipo="salida",
+            cantidad=cantidad,
+            motivo="Venta de producto"
+        )
+
         db.session.add(nueva_venta)
+        db.session.add(nuevo_movimiento)
         db.session.commit()
 
         return jsonify({
@@ -193,10 +226,60 @@ def agregar_stock(id):
         return jsonify({"mensaje": "La cantidad debe ser un número entero mayor a 0"}), 400
 
     producto.stock += cantidad
+
+    movimiento = Movimiento(
+        producto_id=producto.id,
+        tipo="entrada",
+        cantidad=cantidad,
+        motivo="Ingreso manual de stock"
+    )
+
+    db.session.add(movimiento)
     db.session.commit()
 
     return jsonify({
         "mensaje": "Stock actualizado",
+        "producto": {
+            "id": producto.id,
+            "nombre": producto.nombre,
+            "precio": producto.precio,
+            "stock": producto.stock
+        }
+    })
+
+@productos_bp.route('/<int:id>/ajustar-stock', methods=['PUT'])
+def ajustar_stock(id):
+    producto = Producto.query.get_or_404(id)
+    data = request.get_json() or {}
+
+    nuevo_stock = data.get("nuevo_stock")
+    motivo = data.get("motivo", "Ajuste manual")
+
+    if nuevo_stock is None:
+        return jsonify({"mensaje": "Debes enviar el nuevo stock"}), 400
+
+    if not isinstance(nuevo_stock, int) or nuevo_stock < 0:
+        return jsonify({"mensaje": "El nuevo stock debe ser un número entero mayor o igual a 0"}), 400
+
+    stock_anterior = producto.stock
+    diferencia = nuevo_stock - stock_anterior
+
+    producto.stock = nuevo_stock
+
+    if diferencia != 0:
+        tipo = "ajuste"
+        movimiento = Movimiento(
+            producto_id=producto.id,
+            tipo=tipo,
+            cantidad=abs(diferencia),
+            motivo=motivo
+        )
+        db.session.add(movimiento)
+
+    db.session.commit()
+
+    return jsonify({
+        "mensaje": "Stock ajustado correctamente",
         "producto": {
             "id": producto.id,
             "nombre": producto.nombre,
@@ -225,4 +308,26 @@ def obtener_ventas_producto(id):
             "stock": producto.stock
         },
         "ventas": resultado
+    })
+
+@productos_bp.route('/<int:id>/movimientos', methods=['GET'])
+def obtener_movimientos_producto(id):
+    producto = Producto.query.get_or_404(id)
+
+    resultado = []
+    for movimiento in sorted(producto.movimientos, key=lambda m: m.fecha, reverse=True):
+        resultado.append({
+            "id": movimiento.id,
+            "tipo": movimiento.tipo,
+            "cantidad": movimiento.cantidad,
+            "motivo": movimiento.motivo,
+            "fecha": movimiento.fecha
+        })
+
+    return jsonify({
+        "producto": {
+            "id": producto.id,
+            "nombre": producto.nombre
+        },
+        "movimientos": resultado
     })

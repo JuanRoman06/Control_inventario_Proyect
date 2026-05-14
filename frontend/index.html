@@ -1,25 +1,169 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
-    <title>Dulceria</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Inventario - Dulcería</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
-    <h1>Dulceria</h1>
-    <h2>Agregar productos</h2>
+    <div class="dashboard">
+        <header class="topbar">
+            <div>
+                <h1>Dulcería Dashboard</h1>
+                <p>Control de inventario, stock y ventas</p>
+            </div>
+            <button class="btn btn-secondary" id="btn-recargar">Actualizar datos</button>
+        </header>
 
-    <input type="text" id="nombre" placeholder="Nombre">
-    <input type="number" id="precio" placeholder="Precio">
-    <input type="number" id="stock" placeholder="Stock">
+        <section class="metrics-grid">
+            <article class="metric-card">
+                <span class="metric-label">Productos</span>
+                <h2 id="metric-productos">0</h2>
+            </article>
+            <article class="metric-card">
+                <span class="metric-label">Stock total</span>
+                <h2 id="metric-stock">0</h2>
+            </article>
+            <article class="metric-card">
+                <span class="metric-label">Stock bajo</span>
+                <h2 id="metric-stock-bajo">0</h2>
+            </article>
+            <article class="metric-card">
+                <span class="metric-label">Valor inventario</span>
+                <h2 id="metric-valor">$0</h2>
+            </article>
+            <article class="metric-card">
+                <span class="metric-label">Ventas registradas</span>
+                <h2 id="metric-ventas">0</h2>
+            </article>
+            <article class="metric-card">
+                <span class="metric-label">Unidades vendidas</span>
+                <h2 id="metric-unidades-vendidas">0</h2>
+            </article>
+        </section>
 
-    <button onclick="crearProducto()">Agregar</button>
+        <section id="mensaje" class="mensaje oculto"></section>
 
-    <h2>Productos</h2>
-    <ul id="lista-productos"></ul>
+        <main class="main-grid">
+            <section class="panel">
+                <div class="panel-header">
+                    <h3 id="form-title">Agregar producto</h3>
+                    <button class="btn btn-secondary oculto" id="btn-cancelar-edicion">Cancelar edición</button>
+                </div>
+
+                <form id="form-producto" class="form-grid">
+                    <input type="hidden" id="producto-id">
+
+                    <div class="form-group">
+                        <label for="nombre">Nombre</label>
+                        <input type="text" id="nombre" placeholder="Ej: Chocolatina Jet">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="precio">Precio</label>
+                        <input type="number" id="precio" placeholder="Ej: 1500" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="stock">Stock inicial</label>
+                        <input type="number" id="stock" placeholder="Ej: 20" min="0">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="btn-guardar">Guardar producto</button>
+                </form>
+            </section>
+
+            <section class="panel">
+                <div class="panel-header">
+                    <h3>Filtros</h3>
+                </div>
+
+                <div class="filters-grid">
+                    <div class="form-group">
+                        <label for="filtro-nombre">Buscar por nombre</label>
+                        <input type="text" id="filtro-nombre" placeholder="Buscar producto...">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="filtro-stock-bajo">Stock bajo hasta</label>
+                        <input type="number" id="filtro-stock-bajo" placeholder="Ej: 5" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="orden">Ordenar por</label>
+                        <select id="orden">
+                            <option value="">Sin orden</option>
+                            <option value="nombre">Nombre</option>
+                            <option value="precio">Precio</option>
+                            <option value="stock">Stock</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="direccion">Dirección</label>
+                        <select id="direccion">
+                            <option value="asc">Ascendente</option>
+                            <option value="desc">Descendente</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-actions">
+                        <button class="btn btn-primary" id="btn-filtrar" type="button">Aplicar filtros</button>
+                        <button class="btn btn-secondary" id="btn-limpiar-filtros" type="button">Limpiar</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <section class="content-grid">
+            <section class="panel">
+                <div class="panel-header">
+                    <h3>Productos</h3>
+                    <span id="contador-productos" class="tag">0 productos</span>
+                </div>
+                <div id="lista-productos" class="cards-grid"></div>
+            </section>
+
+            <section class="side-grid">
+                <section class="panel">
+                    <div class="panel-header">
+                        <h3>Alertas de stock bajo</h3>
+                        <span class="tag">Crítico</span>
+                    </div>
+                    <div id="lista-alertas" class="ventas-lista"></div>
+                </section>
+
+                <section class="panel">
+                    <div class="panel-header">
+                        <h3>Más vendidos</h3>
+                        <span class="tag">Top 10</span>
+                    </div>
+                    <div id="lista-mas-vendidos" class="ventas-lista"></div>
+                </section>
+
+                <section class="panel">
+                    <div class="panel-header">
+                        <h3>Movimientos recientes</h3>
+                        <span class="tag">Historial</span>
+                    </div>
+                    <div id="lista-movimientos" class="ventas-lista"></div>
+                </section>
+
+                <section class="panel">
+                    <div class="panel-header">
+                        <h3>Ventas recientes</h3>
+                        <span class="tag">Historial</span>
+                    </div>
+                    <div id="lista-ventas" class="ventas-lista"></div>
+                </section>
+            </section>
+        </section>
+    </div>
+
     <script src="js/app.js"></script>
-
 </body>
 
 </html>

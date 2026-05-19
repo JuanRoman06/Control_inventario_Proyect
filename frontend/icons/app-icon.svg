@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Dulceria Inventario">
+  <rect width="512" height="512" rx="96" fill="#0f766e"/>
+  <path d="M104 140h304v232H104z" fill="#ffffff" opacity=".96"/>
+  <path d="M132 180h248M132 236h248M132 292h168" stroke="#0f766e" stroke-width="28" stroke-linecap="round"/>
+  <circle cx="360" cy="304" r="54" fill="#f59e0b"/>
+  <path d="M330 304h60M360 274v60" stroke="#ffffff" stroke-width="22" stroke-linecap="round"/>
+</svg>

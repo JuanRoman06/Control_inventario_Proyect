@@ -12,4 +12,4 @@ class Movimiento(db.Model):
     motivo = db.Column(db.String(255), nullable=True)
     fecha = db.Column(db.DateTime, default=datetime.utcnow)
 
-    producto = db.relationship('Producto', backref='movimientos', lazy=True)
+    producto = db.relationship('Producto', back_populates='movimientos', lazy=True)

@@ -1,11 +1,12 @@
 from flask import Blueprint, jsonify, request
 from models.movimiento import Movimiento
-
+from utils.auth import login_requerido
 
 movimientos_bp = Blueprint('movimientos', __name__)
 
 
 @movimientos_bp.route('/', methods=['GET'])
+@login_requerido
 def listar_movimientos():
     producto_id = request.args.get('producto_id', type=int)
     tipo = request.args.get('tipo')
@@ -31,7 +32,10 @@ def listar_movimientos():
             "producto": {
                 "id": m.producto.id,
                 "nombre": m.producto.nombre,
-                "precio": m.producto.precio
+                "precio": m.producto.precio,
+                "precio_venta": m.producto.precio,
+                "costo": m.producto.costo,
+                "sku": m.producto.sku
             }
         })
 

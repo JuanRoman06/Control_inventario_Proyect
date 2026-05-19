@@ -4,21 +4,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard de Inventario - Dulcería</title>
-    <link rel="stylesheet" href="css/style.css">
+    <meta name="description" content="Aplicación de inventario para dulcería con control de stock, ventas y categorías.">
+    <meta name="theme-color" content="#14b8a6">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Dulcería">
+    <title>Dulcería - Inventario</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="icons/app-icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icons/app-icon.svg">
+    <link rel="stylesheet" href="css/style.css?v=20260515-4">
 </head>
 
 <body>
-    <div class="dashboard">
+    <section id="login-view" class="auth-wrapper">
+        <div class="auth-card">
+            <div class="app-mark" aria-hidden="true">D</div>
+            <p class="eyebrow">Dulcería Inventario</p>
+            <h1>Ingreso al sistema</h1>
+            <p>Inicia sesión para administrar inventario, ventas y categorías.</p>
+            <section id="auth-message" class="mensaje oculto"></section>
+
+            <form id="login-form" class="form-grid">
+                <div class="form-group">
+                    <label for="login-username">Usuario</label>
+                    <input type="text" id="login-username" placeholder="admin">
+                </div>
+
+                <div class="form-group">
+                    <label for="login-password">Contraseña</label>
+                    <input type="password" id="login-password" placeholder="******">
+                </div>
+
+                <button type="submit" class="btn btn-primary">Iniciar sesión</button>
+            </form>
+
+            <button id="btn-crear-admin" class="btn btn-secondary" type="button" style="margin-top: 12px;">
+                Crear usuario administrador inicial
+            </button>
+        </div>
+    </section>
+
+    <div id="app-view" class="dashboard oculto">
         <header class="topbar">
-            <div>
-                <h1>Dulcería Dashboard</h1>
-                <p>Control de inventario, stock y ventas</p>
+            <div class="brand-block">
+                <div class="app-mark" aria-hidden="true">D</div>
+                <div>
+                    <p class="eyebrow">Inventario</p>
+                    <h1>Dulcería Dashboard</h1>
+                    <p>Control de stock, ventas y categorías</p>
+                </div>
             </div>
-            <button class="btn btn-secondary" id="btn-recargar">Actualizar datos</button>
+            <div class="inline-actions">
+                <span id="usuario-logueado" class="tag">Sin sesión</span>
+                <span id="connection-status" class="tag status-online">En línea</span>
+                <button class="btn btn-secondary oculto" id="btn-install-app" type="button">Instalar app</button>
+                <button class="btn btn-secondary" id="btn-recargar">Actualizar datos</button>
+                <button class="btn btn-danger" id="btn-logout">Cerrar sesión</button>
+            </div>
         </header>
 
-        <section class="metrics-grid">
+        <nav class="app-tabs" aria-label="Secciones principales">
+            <button class="tab-btn active" type="button" data-scroll-target="section-resumen">Resumen</button>
+            <button class="tab-btn" type="button" data-scroll-target="section-gestion">Gestión</button>
+            <button class="tab-btn" type="button" data-scroll-target="section-inventario">Inventario</button>
+            <button class="tab-btn" type="button" data-scroll-target="section-reportes">Reportes</button>
+        </nav>
+
+        <section id="section-resumen" class="metrics-grid">
             <article class="metric-card">
                 <span class="metric-label">Productos</span>
                 <h2 id="metric-productos">0</h2>
@@ -36,6 +89,18 @@
                 <h2 id="metric-valor">$0</h2>
             </article>
             <article class="metric-card">
+                <span class="metric-label">Costo inventario</span>
+                <h2 id="metric-costo-inventario">$0</h2>
+            </article>
+            <article class="metric-card">
+                <span class="metric-label">Ingresos por ventas</span>
+                <h2 id="metric-ingresos-ventas">$0</h2>
+            </article>
+            <article class="metric-card">
+                <span class="metric-label">Utilidad ventas</span>
+                <h2 id="metric-utilidad-ventas">$0</h2>
+            </article>
+            <article class="metric-card">
                 <span class="metric-label">Ventas registradas</span>
                 <h2 id="metric-ventas">0</h2>
             </article>
@@ -47,7 +112,7 @@
 
         <section id="mensaje" class="mensaje oculto"></section>
 
-        <main class="main-grid">
+        <main id="section-gestion" class="main-grid">
             <section class="panel">
                 <div class="panel-header">
                     <h3 id="form-title">Agregar producto</h3>
@@ -63,13 +128,40 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="precio">Precio</label>
-                        <input type="number" id="precio" placeholder="Ej: 1500" min="0">
+                        <label for="precio">Precio de venta</label>
+                        <input type="number" id="precio" placeholder="Ej: 1500" min="0" inputmode="numeric">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="costo">Costo unitario</label>
+                        <input type="number" id="costo" placeholder="Ej: 900" min="0" inputmode="numeric">
                     </div>
 
                     <div class="form-group">
                         <label for="stock">Stock inicial</label>
-                        <input type="number" id="stock" placeholder="Ej: 20" min="0">
+                        <input type="number" id="stock" placeholder="Ej: 20" min="0" inputmode="numeric">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="stock-minimo">Stock mínimo</label>
+                        <input type="number" id="stock-minimo" placeholder="Ej: 5" min="0" inputmode="numeric">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="categoria">Categoría</label>
+                        <select id="categoria">
+                            <option value="">Sin categoría</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="proveedor">Proveedor</label>
+                        <input type="text" id="proveedor" placeholder="Ej: Distribuidora Central">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sku">SKU / Código</label>
+                        <input type="text" id="sku" placeholder="Ej: CHOC-001">
                     </div>
 
                     <button type="submit" class="btn btn-primary" id="btn-guardar">Guardar producto</button>
@@ -78,45 +170,70 @@
 
             <section class="panel">
                 <div class="panel-header">
-                    <h3>Filtros</h3>
+                    <h3>Gestión de categorías</h3>
                 </div>
 
-                <div class="filters-grid">
+                <div class="form-grid">
                     <div class="form-group">
-                        <label for="filtro-nombre">Buscar por nombre</label>
-                        <input type="text" id="filtro-nombre" placeholder="Buscar producto...">
+                        <label for="nueva-categoria">Nueva categoría</label>
+                        <input type="text" id="nueva-categoria" placeholder="Ej: Chocolates">
                     </div>
-
-                    <div class="form-group">
-                        <label for="filtro-stock-bajo">Stock bajo hasta</label>
-                        <input type="number" id="filtro-stock-bajo" placeholder="Ej: 5" min="0">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="orden">Ordenar por</label>
-                        <select id="orden">
-                            <option value="">Sin orden</option>
-                            <option value="nombre">Nombre</option>
-                            <option value="precio">Precio</option>
-                            <option value="stock">Stock</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="direccion">Dirección</label>
-                        <select id="direccion">
-                            <option value="asc">Ascendente</option>
-                            <option value="desc">Descendente</option>
-                        </select>
-                    </div>
-
-                    <div class="filter-actions">
-                        <button class="btn btn-primary" id="btn-filtrar" type="button">Aplicar filtros</button>
-                        <button class="btn btn-secondary" id="btn-limpiar-filtros" type="button">Limpiar</button>
-                    </div>
+                    <button class="btn btn-primary" id="btn-crear-categoria" type="button">Crear categoría</button>
                 </div>
+
+                <div id="lista-categorias" class="ventas-lista" style="margin-top: 16px;"></div>
             </section>
         </main>
+
+        <section id="section-inventario" class="panel filters-panel">
+            <div class="panel-header">
+                <h3>Filtros</h3>
+            </div>
+
+            <div class="filters-grid">
+                <div class="form-group">
+                    <label for="filtro-nombre">Buscar por nombre</label>
+                    <input type="text" id="filtro-nombre" placeholder="Buscar producto...">
+                </div>
+
+                <div class="form-group">
+                    <label for="filtro-stock-bajo">Stock bajo hasta</label>
+                    <input type="number" id="filtro-stock-bajo" placeholder="Ej: 5" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label for="filtro-categoria">Filtrar por categoría</label>
+                    <select id="filtro-categoria">
+                        <option value="">Todas</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="orden">Ordenar por</label>
+                    <select id="orden">
+                        <option value="">Sin orden</option>
+                        <option value="nombre">Nombre</option>
+                        <option value="precio">Precio de venta</option>
+                        <option value="costo">Costo</option>
+                        <option value="stock">Stock</option>
+                        <option value="stock_minimo">Stock mínimo</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="direccion">Dirección</label>
+                    <select id="direccion">
+                        <option value="asc">Ascendente</option>
+                        <option value="desc">Descendente</option>
+                    </select>
+                </div>
+
+                <div class="filter-actions">
+                    <button class="btn btn-primary" id="btn-filtrar" type="button">Aplicar filtros</button>
+                    <button class="btn btn-secondary" id="btn-limpiar-filtros" type="button">Limpiar</button>
+                </div>
+            </div>
+        </section>
 
         <section class="content-grid">
             <section class="panel">
@@ -127,7 +244,7 @@
                 <div id="lista-productos" class="cards-grid"></div>
             </section>
 
-            <section class="side-grid">
+            <section id="section-reportes" class="side-grid">
                 <section class="panel">
                     <div class="panel-header">
                         <h3>Alertas de stock bajo</h3>
@@ -163,7 +280,119 @@
         </section>
     </div>
 
-    <script src="js/app.js"></script>
+    <dialog id="modal-admin-inicial" class="app-dialog">
+        <form id="form-admin-inicial" method="dialog" class="dialog-card">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Primer acceso</p>
+                    <h3>Crear administrador</h3>
+                </div>
+                <button class="btn btn-secondary btn-icon" id="btn-cerrar-admin" type="button" aria-label="Cerrar">×</button>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="admin-username">Usuario</label>
+                    <input type="text" id="admin-username" placeholder="admin" autocomplete="username">
+                </div>
+
+                <div class="form-group">
+                    <label for="admin-password">Contraseña</label>
+                    <input type="password" id="admin-password" placeholder="Mínimo 4 caracteres" autocomplete="new-password">
+                </div>
+
+                <button type="submit" class="btn btn-primary">Crear administrador</button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog id="modal-operacion-producto" class="app-dialog">
+        <form id="form-operacion-producto" method="dialog" class="dialog-card">
+            <div class="panel-header">
+                <div>
+                    <p id="operacion-producto-eyebrow" class="eyebrow">Inventario</p>
+                    <h3 id="operacion-producto-titulo">Producto</h3>
+                </div>
+                <button class="btn btn-secondary btn-icon" id="btn-cerrar-operacion" type="button" aria-label="Cerrar">×</button>
+            </div>
+
+            <input type="hidden" id="operacion-producto-id">
+            <input type="hidden" id="operacion-producto-tipo">
+
+            <div class="dialog-summary">
+                <span id="operacion-producto-precio">$0</span>
+                <span id="operacion-producto-stock">Stock actual: 0</span>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="operacion-producto-cantidad">Cantidad</label>
+                    <input type="number" id="operacion-producto-cantidad" min="1" inputmode="numeric">
+                </div>
+
+                <p id="operacion-producto-ayuda" class="helper-text"></p>
+
+                <button type="submit" class="btn btn-primary" id="btn-confirmar-operacion">Confirmar</button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog id="modal-ajuste-stock" class="app-dialog">
+        <form id="form-ajuste-stock" method="dialog" class="dialog-card">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Ajuste manual</p>
+                    <h3 id="ajuste-producto-titulo">Ajustar stock</h3>
+                </div>
+                <button class="btn btn-secondary btn-icon" id="btn-cerrar-ajuste" type="button" aria-label="Cerrar">×</button>
+            </div>
+
+            <input type="hidden" id="ajuste-producto-id">
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="ajuste-stock-actual">Stock actual</label>
+                    <input type="number" id="ajuste-stock-actual" disabled>
+                </div>
+
+                <div class="form-group">
+                    <label for="ajuste-nuevo-stock">Nuevo stock</label>
+                    <input type="number" id="ajuste-nuevo-stock" min="0" inputmode="numeric">
+                </div>
+
+                <div class="form-group">
+                    <label for="ajuste-motivo">Motivo</label>
+                    <input type="text" id="ajuste-motivo" placeholder="Ej: Conteo físico">
+                </div>
+
+                <button type="submit" class="btn btn-primary">Guardar ajuste</button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog id="modal-confirmacion" class="app-dialog">
+        <form id="form-confirmacion" method="dialog" class="dialog-card">
+            <div class="panel-header">
+                <div>
+                    <p id="confirmacion-eyebrow" class="eyebrow">Confirmación</p>
+                    <h3 id="confirmacion-titulo">Confirmar acción</h3>
+                </div>
+                <button class="btn btn-secondary btn-icon" id="btn-cerrar-confirmacion" type="button" aria-label="Cerrar">×</button>
+            </div>
+
+            <input type="hidden" id="confirmacion-tipo">
+            <input type="hidden" id="confirmacion-id">
+
+            <p id="confirmacion-texto" class="dialog-copy"></p>
+
+            <div class="dialog-actions">
+                <button class="btn btn-secondary" id="btn-cancelar-confirmacion" type="button">Cancelar</button>
+                <button class="btn btn-danger" id="btn-confirmar-eliminacion" type="submit">Eliminar</button>
+            </div>
+        </form>
+    </dialog>
+
+    <script src="js/app.js?v=20260515-4"></script>
 </body>
 
 </html>

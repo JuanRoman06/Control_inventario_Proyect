@@ -193,6 +193,23 @@ body {
     gap: 6px;
 }
 
+.check-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--muted);
+    font-weight: 700;
+}
+
+.check-row input {
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    min-height: auto;
+    accent-color: var(--primary);
+    flex: 0 0 auto;
+}
+
 label {
     font-weight: 600;
     color: #334155;
@@ -371,6 +388,21 @@ select:focus {
     background: #f0fdfa;
 }
 
+.compra-item {
+    border-left: 5px solid var(--accent);
+    background: #fffbeb;
+}
+
+.reposicion-item {
+    border-left: 5px solid var(--danger);
+    background: #fff7f7;
+}
+
+.reposicion-item .btn {
+    width: 100%;
+    margin-top: 8px;
+}
+
 .tag {
     background: var(--primary-soft);
     color: var(--primary-strong);
@@ -416,6 +448,7 @@ select:focus {
     .content-grid {
         grid-template-columns: 1fr;
     }
+
 }
 
 .movimiento-entrada {
@@ -483,6 +516,155 @@ select:focus {
 
 .filters-panel {
     margin-bottom: 24px;
+}
+
+.report-panel {
+    margin-bottom: 24px;
+}
+
+.report-heading {
+    align-items: flex-start;
+}
+
+.report-filters {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(180px, 240px)) minmax(140px, auto);
+    align-items: end;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.report-filters .btn {
+    width: 100%;
+}
+
+.report-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.report-summary-item {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface-soft);
+}
+
+.report-summary-item span {
+    color: var(--muted);
+    font-size: 0.88rem;
+    font-weight: 700;
+}
+
+.report-summary-item strong {
+    color: var(--text);
+    font-size: 1.35rem;
+    overflow-wrap: anywhere;
+}
+
+.export-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.export-actions .btn {
+    width: 100%;
+}
+
+.report-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.8fr);
+    gap: 20px;
+    align-items: start;
+}
+
+.report-chart-block,
+.report-products-block {
+    min-width: 0;
+}
+
+.compact-header {
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.compact-header h4 {
+    font-size: 1rem;
+}
+
+.report-chart {
+    display: grid;
+    gap: 10px;
+}
+
+.chart-row {
+    display: grid;
+    grid-template-columns: 86px minmax(120px, 1fr) minmax(130px, auto);
+    align-items: center;
+    gap: 10px;
+    min-height: 46px;
+}
+
+.chart-date {
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.chart-track {
+    height: 12px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #e2e8f0;
+}
+
+.chart-bar {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+}
+
+.chart-values {
+    display: grid;
+    gap: 2px;
+    text-align: right;
+}
+
+.chart-values strong {
+    font-size: 0.95rem;
+}
+
+.chart-values span {
+    color: var(--muted);
+    font-size: 0.82rem;
+}
+
+.report-products-block .ventas-lista {
+    max-height: 430px;
+    overflow: auto;
+    padding-right: 2px;
+}
+
+.report-product-item {
+    display: grid;
+    gap: 4px;
+}
+
+.compras-grid .panel:last-child {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 980px) {
+    .report-layout {
+        grid-template-columns: 1fr;
+    }
 }
 
 .status-online {
@@ -565,6 +747,7 @@ select:focus {
 
 #section-resumen,
 #section-gestion,
+#section-compras,
 #section-inventario,
 #section-reportes {
     scroll-margin-top: 84px;
@@ -653,6 +836,33 @@ select:focus {
         width: 100%;
     }
 
+    .report-filters,
+    .report-summary-grid,
+    .export-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .report-filters .btn {
+        grid-column: 1 / -1;
+    }
+
+    .chart-row {
+        grid-template-columns: 1fr;
+        align-items: stretch;
+        gap: 7px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .chart-row:last-child {
+        border-bottom: none;
+    }
+
+    .chart-values {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        text-align: left;
+    }
+
     .filter-actions {
         display: grid;
         grid-template-columns: 1fr;
@@ -669,6 +879,9 @@ select:focus {
 
 @media (max-width: 430px) {
     .metrics-grid,
+    .report-filters,
+    .report-summary-grid,
+    .export-actions,
     .card-actions,
     .inline-actions {
         grid-template-columns: 1fr;

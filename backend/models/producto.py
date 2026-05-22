@@ -15,4 +15,5 @@ class Producto(db.Model):
 
     ventas = db.relationship('Venta', back_populates='producto', lazy=True)
     movimientos = db.relationship('Movimiento', back_populates='producto', lazy=True)
+    compras = db.relationship('Compra', back_populates='producto', lazy=True)
     categoria = db.relationship('Categoria', back_populates='productos')

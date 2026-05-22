@@ -8,6 +8,7 @@ from flask_cors import CORS
 from models.producto import Producto
 from models.venta import Venta
 from models.movimiento import Movimiento
+from models.compra import Compra
 from models.categoria import Categoria
 from models.usuario import Usuario
 
@@ -29,6 +30,8 @@ from routes.productos import productos_bp
 from routes.ventas import ventas_bp
 from routes.dashboard import dashboard_bp
 from routes.movimientos import movimientos_bp
+from routes.compras import compras_bp
+from routes.exportaciones import exportaciones_bp
 from routes.categorias import categorias_bp
 from routes.auth import auth_bp
 
@@ -36,6 +39,8 @@ app.register_blueprint(productos_bp, url_prefix='/productos')
 app.register_blueprint(ventas_bp, url_prefix='/ventas')
 app.register_blueprint(dashboard_bp, url_prefix='/dashboard')
 app.register_blueprint(movimientos_bp, url_prefix='/movimientos')
+app.register_blueprint(compras_bp, url_prefix='/compras')
+app.register_blueprint(exportaciones_bp, url_prefix='/exportaciones')
 app.register_blueprint(categorias_bp, url_prefix='/categorias')
 app.register_blueprint(auth_bp, url_prefix='/auth')
 

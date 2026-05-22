@@ -36,6 +36,17 @@ const inputCategoria = document.getElementById("categoria");
 const inputProveedor = document.getElementById("proveedor");
 const inputSku = document.getElementById("sku");
 const inputNuevaCategoria = document.getElementById("nueva-categoria");
+const formCompra = document.getElementById("form-compra");
+const compraProducto = document.getElementById("compra-producto");
+const compraCantidad = document.getElementById("compra-cantidad");
+const compraCosto = document.getElementById("compra-costo");
+const compraProveedor = document.getElementById("compra-proveedor");
+const compraFecha = document.getElementById("compra-fecha");
+const compraNota = document.getElementById("compra-nota");
+const compraActualizarCosto = document.getElementById("compra-actualizar-costo");
+const listaCompras = document.getElementById("lista-compras");
+const listaReposicion = document.getElementById("lista-reposicion");
+const reposicionContador = document.getElementById("reposicion-contador");
 
 const filtroNombre = document.getElementById("filtro-nombre");
 const filtroStockBajo = document.getElementById("filtro-stock-bajo");
@@ -53,6 +64,19 @@ const metricUtilidadVentas = document.getElementById("metric-utilidad-ventas");
 const metricVentas = document.getElementById("metric-ventas");
 const metricUnidadesVendidas = document.getElementById("metric-unidades-vendidas");
 const contadorProductos = document.getElementById("contador-productos");
+const reporteDesde = document.getElementById("reporte-desde");
+const reporteHasta = document.getElementById("reporte-hasta");
+const reporteRango = document.getElementById("reporte-rango");
+const btnAplicarReporte = document.getElementById("btn-aplicar-reporte");
+const reporteIngresos = document.getElementById("reporte-ingresos");
+const reporteUtilidad = document.getElementById("reporte-utilidad");
+const reporteUnidades = document.getElementById("reporte-unidades");
+const reporteTicket = document.getElementById("reporte-ticket");
+const reporteGrafico = document.getElementById("reporte-grafico");
+const reporteProductos = document.getElementById("reporte-productos");
+const btnExportInventario = document.getElementById("btn-export-inventario");
+const btnExportVentas = document.getElementById("btn-export-ventas");
+const btnExportCompras = document.getElementById("btn-export-compras");
 
 const modalAjusteStock = document.getElementById("modal-ajuste-stock");
 const formAjusteStock = document.getElementById("form-ajuste-stock");
@@ -96,8 +120,14 @@ document.getElementById("btn-filtrar").addEventListener("click", cargarProductos
 document.getElementById("btn-limpiar-filtros").addEventListener("click", limpiarFiltros);
 document.getElementById("btn-recargar").addEventListener("click", cargarDashboard);
 document.getElementById("btn-crear-categoria").addEventListener("click", crearCategoria);
+btnAplicarReporte.addEventListener("click", cargarReporteVentas);
 btnCancelarEdicion.addEventListener("click", resetFormulario);
 formProducto.addEventListener("submit", guardarProducto);
+formCompra.addEventListener("submit", registrarCompra);
+compraProducto.addEventListener("change", completarDatosCompraProducto);
+btnExportInventario.addEventListener("click", () => descargarExportacion("inventario"));
+btnExportVentas.addEventListener("click", () => descargarExportacion("ventas"));
+btnExportCompras.addEventListener("click", () => descargarExportacion("compras"));
 loginForm.addEventListener("submit", iniciarSesion);
 btnCrearAdmin.addEventListener("click", abrirModalAdminInicial);
 btnLogout.addEventListener("click", cerrarSesion);
@@ -122,6 +152,8 @@ document.querySelectorAll("[data-scroll-target]").forEach(button => {
 document.addEventListener("DOMContentLoaded", () => {
     actualizarEstadoConexion();
     registrarServiceWorker();
+    inicializarFechasReporte();
+    inicializarFechaCompra();
     verificarSesion();
 });
 
@@ -136,6 +168,38 @@ async function apiFetch(url, options = {}) {
     });
 
     return response;
+}
+
+async function descargarExportacion(tipo) {
+    const archivos = {
+        inventario: "inventario_dulceria.csv",
+        ventas: "ventas_dulceria.csv",
+        compras: "compras_dulceria.csv"
+    };
+
+    try {
+        const response = await fetch(`${API_URL}/exportaciones/${tipo}.csv`, {
+            credentials: "include"
+        });
+
+        if (!response.ok) {
+            const texto = await response.text();
+            throw new Error(texto || "No fue posible descargar el archivo");
+        }
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = archivos[tipo] || "exportacion.csv";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        mostrarMensaje("Archivo descargado");
+    } catch (error) {
+        mostrarMensaje(error.message, "error");
+    }
 }
 
 function registrarServiceWorker() {
@@ -274,6 +338,36 @@ function formatearFecha(fecha) {
     return new Date(fecha).toLocaleString("es-CO");
 }
 
+function formatearFechaInput(fecha) {
+    const anio = fecha.getFullYear();
+    const mes = String(fecha.getMonth() + 1).padStart(2, "0");
+    const dia = String(fecha.getDate()).padStart(2, "0");
+    return `${anio}-${mes}-${dia}`;
+}
+
+function formatearFechaCorta(fechaIso) {
+    if (!fechaIso) return "";
+    const partes = fechaIso.split("-");
+    if (partes.length !== 3) return fechaIso;
+    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+}
+
+function inicializarFechasReporte() {
+    if (!reporteDesde || !reporteHasta) return;
+
+    const hasta = new Date();
+    const desde = new Date();
+    desde.setDate(hasta.getDate() - 6);
+
+    reporteDesde.value = formatearFechaInput(desde);
+    reporteHasta.value = formatearFechaInput(hasta);
+}
+
+function inicializarFechaCompra() {
+    if (!compraFecha) return;
+    compraFecha.value = formatearFechaInput(new Date());
+}
+
 function navegarASeccion(button) {
     const target = document.getElementById(button.dataset.scrollTarget);
     if (!target) return;
@@ -313,6 +407,21 @@ function construirQueryProductos() {
     if (filtroOrden.value) {
         params.append("orden", filtroOrden.value);
         params.append("direccion", filtroDireccion.value);
+    }
+
+    const query = params.toString();
+    return query ? `?${query}` : "";
+}
+
+function construirQueryReporte() {
+    const params = new URLSearchParams();
+
+    if (reporteDesde.value) {
+        params.append("desde", reporteDesde.value);
+    }
+
+    if (reporteHasta.value) {
+        params.append("hasta", reporteHasta.value);
     }
 
     const query = params.toString();
@@ -409,8 +518,11 @@ async function cargarDashboard() {
     await Promise.all([
         cargarCategorias(),
         cargarProductos(),
+        cargarProductosCompra(),
         cargarVentas(),
+        cargarComprasRecientes(),
         cargarResumen(),
+        cargarReporteVentas(),
         cargarMasVendidos(),
         cargarMovimientosRecientes()
     ]);
@@ -454,6 +566,22 @@ async function cargarProductos() {
     }
 }
 
+async function cargarProductosCompra() {
+    try {
+        const response = await apiFetch(`${API_URL}/productos/`);
+        const productos = await response.json();
+
+        if (!response.ok) {
+            throw new Error(productos.mensaje || "Error al cargar productos para compras");
+        }
+
+        renderSelectProductosCompra(productos);
+        renderReposicionSugerida(productos);
+    } catch (error) {
+        mostrarMensaje(error.message, "error");
+    }
+}
+
 async function cargarVentas() {
     try {
         const response = await apiFetch(`${API_URL}/ventas/`);
@@ -464,6 +592,21 @@ async function cargarVentas() {
         }
 
         renderVentas(ventas);
+    } catch (error) {
+        mostrarMensaje(error.message, "error");
+    }
+}
+
+async function cargarComprasRecientes() {
+    try {
+        const response = await apiFetch(`${API_URL}/compras/?limite=10`);
+        const compras = await response.json();
+
+        if (!response.ok) {
+            throw new Error(compras.mensaje || "Error al cargar compras recientes");
+        }
+
+        renderCompras(compras);
     } catch (error) {
         mostrarMensaje(error.message, "error");
     }
@@ -488,6 +631,24 @@ async function cargarResumen() {
         metricVentas.textContent = resumen.total_ventas;
         metricUnidadesVendidas.textContent = resumen.unidades_vendidas;
     } catch (error) {
+        mostrarMensaje(error.message, "error");
+    }
+}
+
+async function cargarReporteVentas() {
+    try {
+        const response = await apiFetch(`${API_URL}/dashboard/reporte-ventas${construirQueryReporte()}`);
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.mensaje || "Error al cargar reporte de ventas");
+        }
+
+        renderReporteVentas(data);
+    } catch (error) {
+        if (reporteGrafico) {
+            reporteGrafico.innerHTML = `<div class="empty-state">No fue posible cargar el reporte.</div>`;
+        }
         mostrarMensaje(error.message, "error");
     }
 }
@@ -558,6 +719,33 @@ function renderSelectCategorias(categorias) {
         inputCategoria.innerHTML += `<option value="${categoria.id}">${categoria.nombre}</option>`;
         filtroCategoria.innerHTML += `<option value="${categoria.id}">${categoria.nombre}</option>`;
     });
+}
+
+function renderSelectProductosCompra(productos) {
+    compraProducto.innerHTML = `<option value="">Selecciona un producto</option>`;
+
+    productos
+        .slice()
+        .sort((a, b) => a.nombre.localeCompare(b.nombre))
+        .forEach(producto => {
+            const etiquetaSku = producto.sku ? ` · ${producto.sku}` : "";
+            compraProducto.innerHTML += `
+                <option value="${producto.id}" data-costo="${obtenerCosto(producto)}" data-proveedor="${producto.proveedor || ""}">
+                    ${producto.nombre}${etiquetaSku} · Stock: ${producto.stock}
+                </option>
+            `;
+        });
+}
+
+function completarDatosCompraProducto() {
+    const option = compraProducto.selectedOptions[0];
+    if (!option || !option.value) return;
+
+    compraCosto.value = option.dataset.costo || "";
+
+    if (!compraProveedor.value.trim()) {
+        compraProveedor.value = option.dataset.proveedor || "";
+    }
 }
 
 function renderProductos(productos) {
@@ -658,6 +846,81 @@ function renderVentas(ventas) {
         });
 }
 
+function renderCompras(compras) {
+    listaCompras.innerHTML = "";
+
+    if (compras.length === 0) {
+        listaCompras.innerHTML = `<div class="empty-state">Aún no hay compras registradas.</div>`;
+        return;
+    }
+
+    compras.forEach(compra => {
+        const item = document.createElement("article");
+        item.className = "venta-item compra-item";
+
+        item.innerHTML = `
+            <strong>${compra.producto.nombre}</strong>
+            <div>Cantidad: ${compra.cantidad}</div>
+            <div>Costo unitario: ${formatearPrecio(compra.costo_unitario || 0)}</div>
+            <div>Total compra: ${formatearPrecio(compra.total || 0)}</div>
+            <div>Proveedor: ${compra.proveedor || "Sin proveedor"}</div>
+            <div>Fecha: ${formatearFecha(compra.fecha)}</div>
+        `;
+
+        listaCompras.appendChild(item);
+    });
+}
+
+function renderReposicionSugerida(productos) {
+    listaReposicion.innerHTML = "";
+
+    const pendientes = productos
+        .filter(producto => producto.stock <= obtenerStockMinimo(producto))
+        .sort((a, b) => {
+            const criticidadA = a.stock / Math.max(obtenerStockMinimo(a), 1);
+            const criticidadB = b.stock / Math.max(obtenerStockMinimo(b), 1);
+            return criticidadA - criticidadB;
+        });
+
+    reposicionContador.textContent = `${pendientes.length} pendiente(s)`;
+
+    if (pendientes.length === 0) {
+        listaReposicion.innerHTML = `<div class="empty-state">No hay productos por reponer.</div>`;
+        return;
+    }
+
+    pendientes.forEach(producto => {
+        const stockMinimo = obtenerStockMinimo(producto);
+        const cantidadSugerida = Math.max((stockMinimo * 2) - producto.stock, 1);
+        const costo = obtenerCosto(producto);
+        const item = document.createElement("article");
+        item.className = "venta-item reposicion-item";
+
+        item.innerHTML = `
+            <strong>${producto.nombre}</strong>
+            <div>Stock actual: ${producto.stock} · mínimo: ${stockMinimo}</div>
+            <div>Sugerido comprar: ${cantidadSugerida} unidades</div>
+            <div>Inversión estimada: ${formatearPrecio(cantidadSugerida * costo)}</div>
+            <button class="btn btn-primary" type="button">Preparar compra</button>
+        `;
+
+        item.querySelector("button").addEventListener("click", () => prepararCompraDesdeReposicion(producto, cantidadSugerida));
+        listaReposicion.appendChild(item);
+    });
+}
+
+function prepararCompraDesdeReposicion(producto, cantidadSugerida) {
+    compraProducto.value = producto.id;
+    compraCantidad.value = cantidadSugerida;
+    compraCosto.value = obtenerCosto(producto);
+    compraProveedor.value = producto.proveedor || "";
+    compraNota.value = `Reposición sugerida por stock bajo`;
+
+    document.getElementById("section-compras").scrollIntoView({ behavior: "smooth", block: "start" });
+    compraCantidad.focus();
+    compraCantidad.select();
+}
+
 function renderAlertas(productos) {
     listaAlertas.innerHTML = "";
 
@@ -708,6 +971,76 @@ function renderMasVendidos(productos) {
     });
 }
 
+function renderReporteVentas(data) {
+    const resumen = data.resumen || {};
+
+    reporteRango.textContent = `${formatearFechaCorta(data.desde)} - ${formatearFechaCorta(data.hasta)}`;
+    reporteIngresos.textContent = formatearPrecio(resumen.ingresos || 0);
+    reporteUtilidad.textContent = formatearPrecio(resumen.utilidad || 0);
+    reporteUnidades.textContent = resumen.unidades || 0;
+    reporteTicket.textContent = formatearPrecio(resumen.ticket_promedio || 0);
+
+    renderReporteGrafico(data.por_dia || []);
+    renderReporteProductos(data.productos || []);
+}
+
+function renderReporteGrafico(dias) {
+    reporteGrafico.innerHTML = "";
+
+    const totalIngresos = dias.reduce((total, dia) => total + (dia.ingresos || 0), 0);
+
+    if (dias.length === 0 || totalIngresos === 0) {
+        reporteGrafico.innerHTML = `<div class="empty-state">No hay ventas en este periodo.</div>`;
+        return;
+    }
+
+    const maxIngresos = Math.max(...dias.map(dia => dia.ingresos || 0), 1);
+
+    dias.forEach(dia => {
+        const ingresos = dia.ingresos || 0;
+        const utilidad = dia.utilidad || 0;
+        const porcentaje = ingresos > 0 ? Math.max((ingresos / maxIngresos) * 100, 5) : 0;
+        const item = document.createElement("article");
+        item.className = "chart-row";
+
+        item.innerHTML = `
+            <span class="chart-date">${formatearFechaCorta(dia.fecha)}</span>
+            <div class="chart-track" aria-label="Ingresos ${formatearPrecio(ingresos)}">
+                <div class="chart-bar" style="width: ${porcentaje}%"></div>
+            </div>
+            <div class="chart-values">
+                <strong>${formatearPrecio(ingresos)}</strong>
+                <span>${dia.unidades || 0} und · ${formatearPrecio(utilidad)}</span>
+            </div>
+        `;
+
+        reporteGrafico.appendChild(item);
+    });
+}
+
+function renderReporteProductos(productos) {
+    reporteProductos.innerHTML = "";
+
+    if (productos.length === 0) {
+        reporteProductos.innerHTML = `<div class="empty-state">No hay productos vendidos en este periodo.</div>`;
+        return;
+    }
+
+    productos.forEach((producto, index) => {
+        const item = document.createElement("article");
+        item.className = "venta-item top-item report-product-item";
+
+        item.innerHTML = `
+            <strong>#${index + 1} - ${producto.nombre}</strong>
+            <div>Unidades: ${producto.cantidad}</div>
+            <div>Ingresos: ${formatearPrecio(producto.ingresos || 0)}</div>
+            <div>Utilidad: ${formatearPrecio(producto.utilidad || 0)}</div>
+        `;
+
+        reporteProductos.appendChild(item);
+    });
+}
+
 function renderMovimientos(movimientos) {
     listaMovimientos.innerHTML = "";
 
@@ -730,6 +1063,59 @@ function renderMovimientos(movimientos) {
 
         listaMovimientos.appendChild(item);
     });
+}
+
+async function registrarCompra(event) {
+    event.preventDefault();
+
+    const productoId = parseInt(compraProducto.value);
+    const cantidad = parseInt(compraCantidad.value);
+    const costoUnitario = parseInt(compraCosto.value);
+
+    if (Number.isNaN(productoId)) {
+        mostrarMensaje("Selecciona el producto que compraste", "error");
+        return;
+    }
+
+    if (Number.isNaN(cantidad) || cantidad <= 0) {
+        mostrarMensaje("Ingresa una cantidad comprada válida", "error");
+        return;
+    }
+
+    if (Number.isNaN(costoUnitario) || costoUnitario < 0) {
+        mostrarMensaje("Ingresa un costo unitario válido", "error");
+        return;
+    }
+
+    const payload = {
+        producto_id: productoId,
+        cantidad,
+        costo_unitario: costoUnitario,
+        proveedor: compraProveedor.value.trim() || null,
+        fecha: compraFecha.value || null,
+        nota: compraNota.value.trim() || null,
+        actualizar_costo: compraActualizarCosto.checked
+    };
+
+    try {
+        const response = await apiFetch(`${API_URL}/compras/`, {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.mensaje || "Error al registrar compra");
+        }
+
+        mostrarMensaje(data.mensaje || "Compra registrada");
+        formCompra.reset();
+        compraActualizarCosto.checked = true;
+        inicializarFechaCompra();
+        await cargarDashboard();
+    } catch (error) {
+        mostrarMensaje(error.message, "error");
+    }
 }
 
 async function crearCategoria() {

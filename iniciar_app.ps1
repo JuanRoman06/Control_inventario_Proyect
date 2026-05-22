@@ -4,7 +4,7 @@ $ProjectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $PythonPath = Join-Path $ProjectRoot "venv\Scripts\python.exe"
 $AppPath = Join-Path $ProjectRoot "backend\app.py"
 $AppPort = 5001
-$AppUrl = "http://127.0.0.1:$AppPort/?v=20260515-4"
+$AppUrl = "http://127.0.0.1:$AppPort/?v=20260522-2"
 
 if (-not (Test-Path $PythonPath)) {
     Write-Host "No se encontro el Python del entorno virtual en: $PythonPath" -ForegroundColor Red

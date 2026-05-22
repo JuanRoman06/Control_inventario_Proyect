@@ -13,7 +13,7 @@
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="icon" href="icons/app-icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="icons/app-icon.svg">
-    <link rel="stylesheet" href="css/style.css?v=20260515-4">
+    <link rel="stylesheet" href="css/style.css?v=20260522-2">
 </head>
 
 <body>
@@ -67,6 +67,7 @@
         <nav class="app-tabs" aria-label="Secciones principales">
             <button class="tab-btn active" type="button" data-scroll-target="section-resumen">Resumen</button>
             <button class="tab-btn" type="button" data-scroll-target="section-gestion">Gestión</button>
+            <button class="tab-btn" type="button" data-scroll-target="section-compras">Compras</button>
             <button class="tab-btn" type="button" data-scroll-target="section-inventario">Inventario</button>
             <button class="tab-btn" type="button" data-scroll-target="section-reportes">Reportes</button>
         </nav>
@@ -185,6 +186,78 @@
             </section>
         </main>
 
+        <section id="section-compras" class="main-grid compras-grid">
+            <section class="panel">
+                <div class="panel-header">
+                    <div>
+                        <p class="eyebrow">Reposición</p>
+                        <h3>Registrar compra</h3>
+                    </div>
+                    <span class="tag">Actualiza stock</span>
+                </div>
+
+                <form id="form-compra" class="form-grid">
+                    <div class="form-group">
+                        <label for="compra-producto">Producto</label>
+                        <select id="compra-producto">
+                            <option value="">Selecciona un producto</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="compra-cantidad">Cantidad comprada</label>
+                        <input type="number" id="compra-cantidad" min="1" inputmode="numeric" placeholder="Ej: 24">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="compra-costo">Costo unitario</label>
+                        <input type="number" id="compra-costo" min="0" inputmode="numeric" placeholder="Ej: 850">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="compra-proveedor">Proveedor</label>
+                        <input type="text" id="compra-proveedor" placeholder="Ej: Distribuidora Central">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="compra-fecha">Fecha</label>
+                        <input type="date" id="compra-fecha">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="compra-nota">Nota</label>
+                        <input type="text" id="compra-nota" placeholder="Ej: Factura 1023">
+                    </div>
+
+                    <label class="check-row" for="compra-actualizar-costo">
+                        <input type="checkbox" id="compra-actualizar-costo" checked>
+                        <span>Actualizar costo del producto con esta compra</span>
+                    </label>
+
+                    <button type="submit" class="btn btn-primary">Registrar compra</button>
+                </form>
+            </section>
+
+            <section class="panel">
+                <div class="panel-header">
+                    <h3>Compras recientes</h3>
+                    <span class="tag">Últimas 10</span>
+                </div>
+                <div id="lista-compras" class="ventas-lista"></div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-header">
+                    <div>
+                        <p class="eyebrow">Stock bajo</p>
+                        <h3>Reposición sugerida</h3>
+                    </div>
+                    <span id="reposicion-contador" class="tag">0 pendientes</span>
+                </div>
+                <div id="lista-reposicion" class="ventas-lista"></div>
+            </section>
+        </section>
+
         <section id="section-inventario" class="panel filters-panel">
             <div class="panel-header">
                 <h3>Filtros</h3>
@@ -235,6 +308,73 @@
             </div>
         </section>
 
+        <section id="section-reportes" class="panel report-panel">
+            <div class="panel-header report-heading">
+                <div>
+                    <p class="eyebrow">Ventas</p>
+                    <h3>Reporte de ventas</h3>
+                </div>
+                <span id="reporte-rango" class="tag">Últimos 7 días</span>
+            </div>
+
+            <div class="report-filters">
+                <div class="form-group">
+                    <label for="reporte-desde">Desde</label>
+                    <input type="date" id="reporte-desde">
+                </div>
+
+                <div class="form-group">
+                    <label for="reporte-hasta">Hasta</label>
+                    <input type="date" id="reporte-hasta">
+                </div>
+
+                <button class="btn btn-primary" id="btn-aplicar-reporte" type="button">Aplicar</button>
+            </div>
+
+            <div class="report-summary-grid">
+                <article class="report-summary-item">
+                    <span>Ingresos</span>
+                    <strong id="reporte-ingresos">$0</strong>
+                </article>
+                <article class="report-summary-item">
+                    <span>Utilidad</span>
+                    <strong id="reporte-utilidad">$0</strong>
+                </article>
+                <article class="report-summary-item">
+                    <span>Unidades</span>
+                    <strong id="reporte-unidades">0</strong>
+                </article>
+                <article class="report-summary-item">
+                    <span>Ticket prom.</span>
+                    <strong id="reporte-ticket">$0</strong>
+                </article>
+            </div>
+
+            <div class="export-actions">
+                <button class="btn btn-secondary" id="btn-export-inventario" type="button">Descargar inventario</button>
+                <button class="btn btn-secondary" id="btn-export-ventas" type="button">Descargar ventas</button>
+                <button class="btn btn-secondary" id="btn-export-compras" type="button">Descargar compras</button>
+            </div>
+
+            <div class="report-layout">
+                <section class="report-chart-block" aria-labelledby="reporte-grafico-titulo">
+                    <div class="panel-header compact-header">
+                        <h4 id="reporte-grafico-titulo">Ingresos por día</h4>
+                        <span class="tag">Diario</span>
+                    </div>
+                    <div id="reporte-grafico" class="report-chart"></div>
+                </section>
+
+                <section class="report-products-block" aria-labelledby="reporte-productos-titulo">
+                    <div class="panel-header compact-header">
+                        <h4 id="reporte-productos-titulo">Productos del periodo</h4>
+                        <span class="tag">Top 10</span>
+                    </div>
+                    <div id="reporte-productos" class="ventas-lista"></div>
+                </section>
+            </div>
+        </section>
+
         <section class="content-grid">
             <section class="panel">
                 <div class="panel-header">
@@ -244,7 +384,7 @@
                 <div id="lista-productos" class="cards-grid"></div>
             </section>
 
-            <section id="section-reportes" class="side-grid">
+            <section class="side-grid">
                 <section class="panel">
                     <div class="panel-header">
                         <h3>Alertas de stock bajo</h3>
@@ -392,7 +532,7 @@
         </form>
     </dialog>
 
-    <script src="js/app.js?v=20260515-4"></script>
+    <script src="js/app.js?v=20260522-2"></script>
 </body>
 
 </html>
